@@ -1,12 +1,12 @@
-
 import { pool } from '../config/db.js'
+import { createBoardSchema, updateBoardSchema } from "../validators/board.validator.js";
 
 export const getAllBoards = async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM boards')
         res.json(result.rows)
     } catch (err) {
-        next(err)      
+        next(err)
     }
 }
 
@@ -22,6 +22,9 @@ export const getBoardById = async (req, res) => {
 }
 
 export const createBoard = async (req, res) => {
+    const { error } = createBoardSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
     try {
         const { title, columns } = req.body
         const result = await pool.query(
@@ -35,6 +38,9 @@ export const createBoard = async (req, res) => {
 }
 
 export const updateBoard = async (req, res, next) => {
+    const { error } = updateBoardSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
     try {
         const { boardId } = req.params
         const { title, columns } = req.body

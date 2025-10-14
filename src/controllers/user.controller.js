@@ -1,4 +1,4 @@
-
+import { registerSchema, loginSchema } from "../validators/user.validator.js";
 import bcrypt from 'bcrypt'
 import { pool } from '../config/db.js'
 
@@ -26,6 +26,8 @@ export const getUserById = async (req, res) => {
 
 
 export const registerUser = async (req, res) => {
+    const { error } = registerSchema.validate(req.body)
+    if (error) return res.status(400).json({ error: error.details[0].message })
     try {
         const { name, email, password } = req.body
         const hashedPassword = await bcrypt.hash(password, 10)
@@ -41,6 +43,9 @@ export const registerUser = async (req, res) => {
 
 
 export const loginUser = async (req, res) => {
+    const { error } = loginSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
     try {
         const { email, password } = req.body
         const result = await pool.query('SELECT * FROM users WHERE email=$1', [email])
@@ -78,10 +83,11 @@ export const deleteUser = async (req, res) => {
     try {
         const { userId } = req.params
 
-        
         await pool.query('UPDATE tasks SET userId = NULL WHERE userId=$1', [userId])
+
         const result = await pool.query('DELETE FROM users WHERE id=$1 RETURNING id', [userId])
         if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' })
+
         res.json({ message: 'User deleted successfully' })
     } catch (err) {
         next(err)
