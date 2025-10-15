@@ -1,22 +1,12 @@
 import { registerSchema, loginSchema } from "../validators/user.validator.js";
-import bcrypt from 'bcrypt'
 import { pool } from '../config/db.js'
-
-
-// export const getAllUsers = async (req, res) => {
-//     try {
-//         const result = await pool.query('SELECT id, name, email FROM users')
-//         res.json(result.rows)
-//     } catch (err) {
-//         next(err)
-//     }
-// }
+import { hashPassword, comparePassword } from "../helpers/bcryptHelper.js";
 
 
 export const getAllUsers = async (req, res, next) => {
     try {
-        const page = parseInt(req.query.page) || 1; // hozirgi sahifa
-        const limit = parseInt(req.query.limit) || 10; // har sahifadagi userlar soni
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
         const result = await pool.query(
@@ -24,7 +14,6 @@ export const getAllUsers = async (req, res, next) => {
             [limit, offset]
         );
 
-        // umumiy foydalanuvchilar sonini olish
         const countResult = await pool.query('SELECT COUNT(*) FROM users');
         const totalUsers = parseInt(countResult.rows[0].count);
         const totalPages = Math.ceil(totalUsers / limit);
@@ -60,7 +49,7 @@ export const registerUser = async (req, res, next) => {
     if (error) return res.status(400).json({ error: error.details[0].message })
     try {
         const { name, email, password } = req.body
-        const hashedPassword = await bcrypt.hash(password, 10)
+        const hashedPassword = await hashPassword(password)
         const result = await pool.query(
             'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email',
             [name, email, hashedPassword]
@@ -84,7 +73,7 @@ export const loginUser = async (req, res, next) => {
             .json({ error: 'User not found. Please check your email or register first.' })
 
         const user = result.rows[0]
-        const isMatch = await bcrypt.compare(password, user.password)
+        const isMatch = await comparePassword(password, user.password)
         if (!isMatch) return res.status(400).json({ error: 'Invalid password' })
 
         delete user.password // parolni javobdan olib tashlash
@@ -115,7 +104,7 @@ export const updateUser = async (req, res, next) => {
 
         let hashedPassword = oldData.password;
         if (password) {
-            hashedPassword = await bcrypt.hash(password, 10);
+            hashedPassword = await hashPassword(password);
         }
         const newName = name || oldData.name;
         const newEmail = email || oldData.email;
