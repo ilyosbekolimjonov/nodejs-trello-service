@@ -30,8 +30,6 @@ export const getAllUsers = async (req, res, next) => {
 };
 
 
-
-
 export const getUserById = async (req, res, next) => {
     try {
         const { userId } = req.params
@@ -80,8 +78,7 @@ export const loginUser = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: `Welcome back, ${user.name || "User"}!`,
-            user,
+            message: `Welcome back, ${user.name || "User"}!`
         })
     } catch (err) {
         next(err)

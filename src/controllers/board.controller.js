@@ -26,10 +26,10 @@ export const createBoard = async (req, res) => {
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     try {
-        const { title, columns } = req.body
+        const { title, userId } = req.body
         const result = await pool.query(
-            'INSERT INTO boards (title, columns) VALUES ($1, $2) RETURNING *',
-            [title, columns]
+            'INSERT INTO boards (title, userId) VALUES ($1, $2) RETURNING *',
+            [title, userId]
         )
         res.status(201).json(result.rows[0])
     } catch (err) {
