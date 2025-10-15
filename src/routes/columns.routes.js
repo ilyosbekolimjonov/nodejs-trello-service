@@ -9,9 +9,9 @@ import {
 
 const router = express.Router();
 
-router.get("/", getColumns);
-router.get("/board/:boardId", getColumnsByBoard);
-router.post("/board/:boardId", createColumn);
+router.get("/columns", getColumns);
+router.get("columns/:columnId", getColumnsByBoard);
+router.post("/columns", createColumn);
 router.put("/:columnId", updateColumn);
 router.delete("/:columnId", deleteColumn);
 

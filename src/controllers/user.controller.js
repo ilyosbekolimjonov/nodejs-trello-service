@@ -2,7 +2,6 @@ import { registerSchema, loginSchema } from "../validators/user.validator.js";
 import { pool } from '../config/db.js'
 import { hashPassword, comparePassword } from "../helpers/bcryptHelper.js";
 
-
 export const getAllUsers = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1; 
@@ -25,7 +24,7 @@ export const getAllUsers = async (req, res, next) => {
             users: result.rows
         });
     } catch (err) {
-        return next(err);
+        next(err);
     }
 };
 

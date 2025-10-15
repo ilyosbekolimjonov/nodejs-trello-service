@@ -1,16 +1,33 @@
 import { pool } from '../config/db.js'
 import { createBoardSchema, updateBoardSchema } from "../validators/board.validator.js";
 
-export const getAllBoards = async (req, res) => {
+export const getAllBoards = async (req, res, next) => {
     try {
-        const result = await pool.query('SELECT * FROM boards')
-        res.json(result.rows)
-    } catch (err) {
-        next(err)
-    }
-}
+        const page = parseInt(req.query.page) || 1;   
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
 
-export const getBoardById = async (req, res) => {
+        const result = await pool.query(
+            'SELECT * FROM boards ORDER BY id LIMIT $1 OFFSET $2',
+            [limit, offset]
+        );
+
+        const countResult = await pool.query('SELECT COUNT(*) FROM boards');
+        const totalBoards = parseInt(countResult.rows[0].count);
+        const totalPages = Math.ceil(totalBoards / limit);
+
+        res.json({
+            page,
+            totalPages,
+            totalBoards,
+            boards: result.rows
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getBoardById = async (req, res, next) => {
     try {
         const { boardId } = req.params
         const result = await pool.query('SELECT * FROM boards WHERE id=$1', [boardId])
@@ -21,7 +38,7 @@ export const getBoardById = async (req, res) => {
     }
 }
 
-export const createBoard = async (req, res) => {
+export const createBoard = async (req, res, next) => {
     const { error } = createBoardSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 

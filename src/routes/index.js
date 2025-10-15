@@ -10,10 +10,10 @@ const router = express.Router();
 
 // Barcha marshrutlarni bu yerda
 router.use("/auth", authRoutes);
-router.use("/boards", boardsRoutes);
-router.use("/users", usersRoutes);
-router.use("/tasks", tasksRoutes);
-router.use("/columns", columnsRoutes);
-router.use("/setup", setupRoutes);
+router.use("/", boardsRoutes);
+router.use("/", usersRoutes);
+router.use("/", tasksRoutes);
+router.use("/", columnsRoutes);
+router.use("/", setupRoutes);
 
 export default router;

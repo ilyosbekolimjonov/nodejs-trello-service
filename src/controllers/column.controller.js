@@ -3,8 +3,24 @@ import { pool } from "../config/db.js";
 // GET all columns
 export const getColumns = async (req, res, next) => {
     try {
-        const result = await pool.query("SELECT * FROM columns ORDER BY id");
-        res.json(result.rows);
+        const page = parseInt(req.query.page) || 1;   
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const result = await pool.query(
+            'SELECT * FROM columns ORDER BY id LIMIT $1 OFFSET $2',
+            [limit, offset]
+        );
+        const countResult = await pool.query('SELECT COUNT(*) FROM columns');
+        const totalColumns = parseInt(countResult.rows[0].count);
+        const totalPages = Math.ceil(totalColumns / limit);
+
+        res.json({
+            page,
+            totalPages,
+            totalColumns,
+            columns: result.rows
+        });
     } catch (err) {
         next(err);
     }

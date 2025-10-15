@@ -4,9 +4,26 @@ import { createTaskSchema, updateTaskSchema } from "../validators/task.validator
 // GET all tasks by board
 export const getTasks = async (req, res, next) => {
     try {
-        const { boardId } = req.params;
-        const result = await pool.query("SELECT * FROM tasks WHERE boardId=$1 ORDER BY id", [boardId]);
-        res.json(result.rows);
+        const page = parseInt(req.query.page) || 1;   
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const result = await pool.query(
+            'SELECT * FROM tasks ORDER BY id LIMIT $1 OFFSET $2',
+            [ limit, offset]
+        );
+
+        const countResult = await pool.query('SELECT COUNT(*) FROM tasks');
+        const totalTasks = parseInt(countResult.rows[0].count);
+        const totalPages = Math.ceil(totalTasks / limit);
+        
+        res.json({
+            page,
+            totalPages, 
+            totalTasks,
+            tasks: result.rows
+        });
+
     } catch (err) {
         next(err);
     }
