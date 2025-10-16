@@ -20,7 +20,7 @@ export const getColumns = async (req, res, next) => {
             page,
             totalPages,
             totalColumns,
-            columns: result.rows
+            data: result.rows
         });
     } catch (err) {
         next(err);

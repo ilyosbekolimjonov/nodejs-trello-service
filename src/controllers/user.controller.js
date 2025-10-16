@@ -21,7 +21,7 @@ export const getAllUsers = async (req, res, next) => {
             page,
             totalPages,
             totalUsers,
-            users: result.rows
+            data: result.rows
         });
     } catch (err) {
         next(err);

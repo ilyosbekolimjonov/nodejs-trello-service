@@ -1,32 +1,6 @@
 import { pool } from '../config/db.js'
 import { createBoardSchema, updateBoardSchema } from "../validators/board.validator.js";
 
-// export const getAllBoards = async (req, res, next) => {
-//     try {
-//         const page = parseInt(req.query.page) || 1;   
-//         const limit = parseInt(req.query.limit) || 10;
-//         const offset = (page - 1) * limit;
-
-//         const result = await pool.query(
-//             'SELECT * FROM boards ORDER BY id LIMIT $1 OFFSET $2',
-//             [limit, offset]
-//         );
-
-//         const countResult = await pool.query('SELECT COUNT(*) FROM boards');
-//         const totalBoards = parseInt(countResult.rows[0].count);
-//         const totalPages = Math.ceil(totalBoards / limit);
-
-//         res.json({
-//             page,
-//             totalPages,
-//             totalBoards,
-//             boards: result.rows
-//         });
-//     } catch (err) {
-//         next(err);
-//     }
-// };
-
 export const getAllBoards = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -48,7 +22,6 @@ export const getAllBoards = async (req, res, next) => {
             values.push(`%${search}%`);
         }
 
-        // Pagination parametrlari
         query += ` ORDER BY id LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
         values.push(limit, offset);
 
@@ -61,7 +34,7 @@ export const getAllBoards = async (req, res, next) => {
             page,
             totalPages,
             totalBoards,
-            boards: result.rows,
+            data: result.rows,
         });
     } catch (err) {
         next(err);

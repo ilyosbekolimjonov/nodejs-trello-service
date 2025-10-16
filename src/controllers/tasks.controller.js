@@ -21,7 +21,7 @@ export const getTasks = async (req, res, next) => {
             page,
             totalPages, 
             totalTasks,
-            tasks: result.rows
+            data: result.rows
         });
 
     } catch (err) {
