@@ -27,6 +27,5 @@ CREATE TABLE IF NOT EXISTS tasks (
   "order" INT NOT NULL, 
   description TEXT,
   userId uuid NOT NULL REFERENCES users(id) ON DELETE SET NULL,
-  boardId uuid NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
   columnId uuid NOT NULL REFERENCES columns(id) ON DELETE CASCADE
 );

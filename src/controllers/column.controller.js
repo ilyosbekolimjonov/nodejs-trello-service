@@ -27,10 +27,10 @@ export const getColumns = async (req, res, next) => {
 };
 
 // GET columns by boardid
-export const getColumnsByBoard = async (req, res, next) => {
+export const getColumnsById = async (req, res, next) => {
     try {
-        const { boardid } = req.params;
-        const result = await pool.query("SELECT * FROM columns WHERE boardid = $1", [boardid]);
+        const { columnId } = req.params;
+        const result = await pool.query("SELECT * FROM columns WHERE columnId = $1", [columnId]);
         res.json(result.rows);
     } catch (err) {
         next(err);

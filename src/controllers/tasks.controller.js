@@ -32,10 +32,10 @@ export const getTasks = async (req, res, next) => {
 // GET task by ID
 export const getTaskById = async (req, res, next) => {
     try {
-        const { boardId, taskId } = req.params;
+        const { taskId } = req.params;
         const result = await pool.query(
-            "SELECT * FROM tasks WHERE boardId=$1 AND id=$2",
-            [boardId, taskId]
+            "SELECT * FROM tasks WHERE id=$2",
+            [ taskId]
         );
         if (result.rows.length === 0) return res.status(404).json({ error: "Task not found" });
         res.json(result.rows[0]);
@@ -50,13 +50,12 @@ export const createTask = async (req, res, next) => {
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     try {
-        const { boardId } = req.params;
         const { title, order, description, userId, columnId } = req.body;
 
         const result = await pool.query(
-            `INSERT INTO tasks (title, "order", description, "userId", "boardId", "columnId")
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [title, order, description, userId, boardId, columnId]
+            `INSERT INTO tasks (title, "order", description, userId, columnId)
+            VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [title, order, description, userId, columnId]
         );
 
         res.status(201).json(result.rows[0]);
@@ -71,19 +70,29 @@ export const updateTask = async (req, res, next) => {
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     try {
-        const { boardId, taskId } = req.params;
-        const { title, order, description, userId, columnId } = req.body;
+        const { taskId } = req.params;
+        const { title, order, description, userid, columnid } = req.body;
+
+        const oldData = await pool.query("SELECT * FROM tasks WHERE id=$1", [taskId]);
+        const current = oldData.rows[0];
+
+        const newTitle = title ?? current.title;
+        const newOrder = order ?? current.order;
+        const newDescription = description ?? current.description;
+        const newuserid = userid ?? current.userid;
+        const newcolumnid = columnid ?? current.columnid;
 
         const result = await pool.query(
             `UPDATE tasks 
-            SET title=$1, "order"=$2, description=$3, "userId"=$4, "columnId"=$5
-            WHERE id=$6 AND "boardId"=$7
+            SET title=$1, "order"=$2, description=$3, userid=$4, columnid=$5
+            WHERE id=$6
             RETURNING *`,
-            [title, order, description, userId, columnId, taskId, boardId]
+            [newTitle, newOrder, newDescription, newuserid, newcolumnid, taskId]
         );
 
         if (result.rows.length === 0) return res.status(404).json({ error: "Task not found" });
         res.json(result.rows[0]);
+
     } catch (err) {
         next(err);
     }
@@ -92,11 +101,11 @@ export const updateTask = async (req, res, next) => {
 // DELETE task
 export const deleteTask = async (req, res, next) => {
     try {
-        const { boardId, taskId } = req.params;
+        const { taskId } = req.params;
 
         const result = await pool.query(
-            "DELETE FROM tasks WHERE id=$1 AND boardId=$2 RETURNING *",
-            [taskId, boardId]
+            "DELETE FROM tasks WHERE id=$1 RETURNING *",
+            [taskId]
         );
 
         if (result.rows.length === 0) return res.status(404).json({ error: "Task not found" });
