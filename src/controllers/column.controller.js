@@ -26,11 +26,11 @@ export const getColumns = async (req, res, next) => {
     }
 };
 
-// GET columns by boardId
+// GET columns by boardid
 export const getColumnsByBoard = async (req, res, next) => {
     try {
-        const { boardId } = req.params;
-        const result = await pool.query("SELECT * FROM columns WHERE boardId = $1", [boardId]);
+        const { boardid } = req.params;
+        const result = await pool.query("SELECT * FROM columns WHERE boardid = $1", [boardid]);
         res.json(result.rows);
     } catch (err) {
         next(err);
@@ -40,12 +40,11 @@ export const getColumnsByBoard = async (req, res, next) => {
 // CREATE column
 export const createColumn = async (req, res, next) => {
     try {
-        const { boardId } = req.params;
-        const { title } = req.body;
+        const { title, order, boardid } = req.body;
 
         const result = await pool.query(
-            "INSERT INTO columns (title, boardId) VALUES ($1, $2) RETURNING *",
-            [title, boardId]
+            "INSERT INTO columns (title, \"order\", boardid) VALUES ($1, $2, $3) RETURNING *",
+            [title, order, boardid]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
@@ -57,15 +56,22 @@ export const createColumn = async (req, res, next) => {
 export const updateColumn = async (req, res, next) => {
     try {
         const { columnId } = req.params;
-        const { title } = req.body;
+        const { title, order, boardid } = req.body;
+
+        const oldData = await pool.query("SELECT * FROM columns WHERE id=$1", [columnId]);
+        const current = oldData.rows[0];
+        
+        const newTitle = title ?? current.title;
+        const newOrder = order ?? current.order;
+        const newboardid = boardid ?? current.boardid;
 
         const result = await pool.query(
-            "UPDATE columns SET title=$1 WHERE id=$2 RETURNING *",
-            [title, columnId]
+            "UPDATE columns SET title=$1, \"order\"=$2, boardid=$3 WHERE id=$4 RETURNING *",
+            [newTitle, newOrder, newboardid, columnId]
         );
-
         if (result.rows.length === 0) return res.status(404).json({ error: "Column not found" });
         res.json(result.rows[0]);
+
     } catch (err) {
         next(err);
     }
@@ -76,8 +82,7 @@ export const deleteColumn = async (req, res, next) => {
     try {
         const { columnId } = req.params;
 
-        // O‘sha columndagi task'larni o'chir
-        await pool.query("DELETE FROM tasks WHERE columnId=$1", [columnId]);
+        await pool.query("DELETE FROM tasks WHERE \"columnId\"=$1", [columnId]);
 
         const result = await pool.query("DELETE FROM columns WHERE id=$1 RETURNING *", [columnId]);
         if (result.rows.length === 0) return res.status(404).json({ error: "Column not found" });

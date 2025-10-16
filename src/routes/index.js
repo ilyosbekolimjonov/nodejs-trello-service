@@ -13,7 +13,7 @@ router.use("/auth", authRoutes);
 router.use("/", boardsRoutes);
 router.use("/", usersRoutes);
 router.use("/", tasksRoutes);
-router.use("/", columnsRoutes);
+router.use("/columns", columnsRoutes);
 router.use("/", setupRoutes);
 
 export default router;
