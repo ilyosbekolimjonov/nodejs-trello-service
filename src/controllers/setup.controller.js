@@ -34,7 +34,7 @@ export const setUpDatabase = async (req, res, next) => {
             title VARCHAR(255) NOT NULL, 
             "order" INT NOT NULL, 
             description TEXT,
-            userId uuid NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+            userId uuid REFERENCES users(id) ON DELETE SET NULL,
             columnId uuid NOT NULL REFERENCES columns(id) ON DELETE CASCADE
           );
         `);
