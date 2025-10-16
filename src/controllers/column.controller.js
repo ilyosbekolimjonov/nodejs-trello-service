@@ -1,4 +1,5 @@
 import { pool } from "../config/db.js";
+import { createColumnSchema, updateColumnSchema } from "../validators/column.validator.js";
 
 // GET all columns
 export const getColumns = async (req, res, next) => {
@@ -39,6 +40,9 @@ export const getColumnsById = async (req, res, next) => {
 
 // CREATE column
 export const createColumn = async (req, res, next) => {
+    const { error } = createColumnSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });  
+
     try {
         const { title, order, boardid } = req.body;
 
@@ -54,6 +58,9 @@ export const createColumn = async (req, res, next) => {
 
 // UPDATE column
 export const updateColumn = async (req, res, next) => {
+    const { error } = updateColumnSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
     try {
         const { columnId } = req.params;
         const { title, order, boardid } = req.body;
