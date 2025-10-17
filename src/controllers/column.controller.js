@@ -89,7 +89,7 @@ export const deleteColumn = async (req, res, next) => {
     try {
         const { columnId } = req.params;
 
-        await pool.query("DELETE FROM tasks WHERE \"columnId\"=$1", [columnId]);
+        await pool.query("DELETE FROM tasks WHERE columnId=$1", [columnId]);
 
         const result = await pool.query("DELETE FROM columns WHERE id=$1 RETURNING *", [columnId]);
         if (result.rows.length === 0) return res.status(404).json({ error: "Column not found" });
